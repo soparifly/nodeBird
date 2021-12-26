@@ -1,7 +1,7 @@
 // index.js;
 const passport = require("passport");
 const local = require("./localStrategy");
-const kakao = requrie("./kakaoStrategy");
+const kakao = require("./kakaoStrategy");
 const User = require("../models/user");
 /**
  * Passport 핵심
