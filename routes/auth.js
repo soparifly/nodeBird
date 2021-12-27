@@ -84,8 +84,16 @@ router.get("/logout", isLoggedIn, (req, res) => {
   res.redirect("/");
 });
 
+//GET /auth/kakao 접근 로그인과정시작
 router.get("/kakao", passport.authenticate("kakao"));
-
+/**
+ * 로그인 성공결과
+ * passport.authencticate 메서드에 콜백함수를 제공하지않는다
+ * 카카오 로그인은 성공시 내부적으로 req.login 을 호출하므로
+ * 직접호출할 필요가 없다,
+ * failureRedirect 속성에 추가
+ * auth 라우터를 app.js에 연결한다
+ */
 router.get(
   "./kakao/callback",
   passport.authenticate("kakao", {

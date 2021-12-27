@@ -9,7 +9,7 @@ const User = require("../models/user");
  * usernameField, passwordField에는 일치하는 로그인 라우터의 req.body 속성명을 적으면된다
  *
  */
-module.export = () => {
+module.exports = () => {
   passport.use(
     new LocalStrategy(
       {
@@ -19,8 +19,10 @@ module.export = () => {
       async (email, password, done) => {
         try {
           const exUser = await User.findOne({ where: { email } });
+
           if (exUser) {
             const result = await bcrypt.compare(password, exUser.password);
+
             if (result) {
               done(null, exUser);
             } else {
