@@ -67,10 +67,9 @@ router.post("/login", isNotLoggedIn, (req, res, next) => {
         console.error(loginError);
         return next(loginError);
       }
-
       return res.redirect("/");
-    })(req, res, next);
-  });
+    });
+  })(req, res, next);
 });
 /**
  * req.logout메서드는 req.user 객체를 제거
@@ -95,7 +94,7 @@ router.get("/kakao", passport.authenticate("kakao"));
  * auth 라우터를 app.js에 연결한다
  */
 router.get(
-  "./kakao/callback",
+  "/kakao/callback",
   passport.authenticate("kakao", {
     failureRedirect: "/",
   }),

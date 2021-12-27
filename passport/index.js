@@ -21,8 +21,32 @@ module.exports = () => {
   passport.serializeUser((user, done) => {
     done(null, user.id);
   });
+  /**
+   * 라우터가 실해되기전에 deserializeUser가 먼저 실행된다.
+   * 모든 요청이 들어올때마다 매번 사용자 정보를 조회하게된다
+   * 서비스의 규모가 커질수록 많은 요청이 들어옴
+   * 사용자 정보가 빈번하게 바뀌는 것이 아니라면
+   * 캐싱을 해두는 것이 좋다
+   * 캐싱이 유지되는 동안 팔로워와 팔로잉정보가 갱신되지않는 단점
+   *
+   */
   passport.deserializeUser((id, done) => {
-    User.findOne({ where: { id } })
+    User.findOne({
+      where: { id },
+      // include 지정 실수로 비밀번호를 조회하는 것을 방지함
+      include: [
+        {
+          model: User,
+          attributes: ["id", "nick"],
+          as: "Followers",
+        },
+        {
+          model: User,
+          attributes: ["id", "nick"],
+          as: "Followings",
+        },
+      ],
+    })
       .then((user) => done(null, user))
       .catch((err) => done(err));
   });

@@ -1,4 +1,5 @@
 // middlewares.js;
+
 /**
  * Passport 는 req객체에 isAuthenticaed 메서드를 추가한다
  * 로그인중이면 req.isAuthenticated()가 true

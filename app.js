@@ -6,8 +6,25 @@ const session = require("express-session");
 const nunjucks = require("nunjucks");
 const dotenv = require("dotenv");
 const { sequelize } = require("./models");
-const passportConfig = require("./passport");
-const passport = require("passport");
+
+/**
+ * 미들웨어는 req,res,next를 매개변수로 가지는 함수다(err제외.)
+ * app.use(미들웨어, 미들웨어, 미들웨어)처럼 여러개의 미들웨어를 장착할 수 있으며,
+ * next를 이용해서 다음 미들웨어로 넘어간다
+ * 위의 미들웨어들은 내부적으로 next를 호출한다
+ * next를 호출하지않는 미들웨어는 res.send , res.sendFile등의 메서드로 응답을 보내야한다
+ * 정적 파일을 제공하는 미들웨어는 실행되지않는다
+ *
+ * 장착순서에 따라 어떤 미들웨어는 실행되지않을 수 있다
+ * next도 호출하지않고 res 응답도없으면 클라이언트는 계속 기다린다
+ *
+ *
+ * 인수로 라우트 문자열을 넣으면 다음 라우터의 미들웨어로 바로이동
+ * 그외의 인수는 바로 에러처리 미들웨어로 이동
+ * 이때의 인수는 에러처리 미들웨어의 err aoroqustnrk ehlsek
+ *
+ */
+
 /**
  * require './passport 는 require('./passport/index.js') 와 같다
  * 폴더내의 index.js 파일은 require 시 이름을 생략할 수있다
@@ -27,7 +44,12 @@ const passport = require("passport");
 dotenv.config();
 const pageRouter = require("./routes/page");
 const authRouter = require("./routes/auth");
+const postRouter = require("./routes/post");
+const userRouter = require("./routes/user");
+const passportConfig = require("./passport");
+const passport = require("passport");
 const app = express();
+
 // 패스포트설정
 passportConfig();
 //포트설정
@@ -60,9 +82,6 @@ app.use(
  * app.post('/주소') /주소 post 미들웨어
  */
 
-app.use(passport.initialize());
-app.use(passport.session());
-
 // sequlize 설정
 sequelize
   .sync({ force: false })
@@ -72,6 +91,7 @@ sequelize
   .catch((err) => {
     console.error(err);
   });
+
 /**
  * morgan
  * dev / combined / common / short / tiny
@@ -103,6 +123,7 @@ app.use(express.static(path.join(__dirname, "public")));
  * app.use(bodyParser.raw()) / app.use(boduParser.text()) 옵션을 추가한다
  *
  */
+app.use("/img", express.static(path.join(__dirname, "uploads")));
 app.use(express.json());
 //extended옵션
 // false : queryString 모듈을 사용하여 쿼리스트링을 해석하고
@@ -142,8 +163,13 @@ app.use(
     },
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use("/", pageRouter);
 app.use("/auth", authRouter);
+app.use("/post", postRouter);
+app.use("/user", userRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
